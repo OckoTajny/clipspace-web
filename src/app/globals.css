@@ -1,78 +1,56 @@
 @import "tailwindcss";
 
-/* The office-memo palette. A paperclip lives on a desk:
-   copy paper, ink, steel wire, highlighter, ballpoint, red pen. */
+/* Racing green + brass + cream — a nice desk set, not a SaaS template.
+   No gradients, no glass, no glow. */
 :root {
-  --paper: #faf8f2;
-  --ink: #1c1914;
-  --steel: #7c8391;
-  --steel-soft: #aab1bc;
-  --highlighter: #ffe84d;
-  --ballpoint: #2244bb;
-  --redpen: #c93a2c;
-  --rule: #1c19141f;
+  --bg: #131f1a;
+  --surface: #1b2a23;
+  --surface-2: #22332b;
+  --cream: #f2ede0;
+  --muted: #9daa9f;
+  --brass: #d9a441;
+  --brass-soft: #e5b455;
+  --line: #f2ede01a;
 }
 
 @theme inline {
-  --color-paper: var(--paper);
-  --color-ink: var(--ink);
-  --color-steel: var(--steel);
-  --color-steel-soft: var(--steel-soft);
-  --color-highlighter: var(--highlighter);
-  --color-ballpoint: var(--ballpoint);
-  --color-redpen: var(--redpen);
-  --color-rule: var(--rule);
-  --font-sans: var(--font-franklin);
-  --font-display: var(--font-plex-mono);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-cream: var(--cream);
+  --color-muted: var(--muted);
+  --color-brass: var(--brass);
+  --color-brass-soft: var(--brass-soft);
+  --color-line: var(--line);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-bricolage);
 }
 
 body {
-  background: var(--paper);
-  color: var(--ink);
-  font-family: var(--font-franklin), Georgia, serif;
+  background: var(--bg);
+  color: var(--cream);
+  font-family: var(--font-body), system-ui, sans-serif;
 }
 
 .font-display {
-  font-family: var(--font-plex-mono), ui-monospace, monospace;
+  font-family: var(--font-bricolage), var(--font-body), sans-serif;
 }
 
-/* highlighter swipe behind a word — slightly uneven, like a real marker */
-.hl {
-  background: linear-gradient(
-    100deg,
-    transparent 2%,
-    var(--highlighter) 6%,
-    var(--highlighter) 94%,
-    transparent 97%
-  );
-  padding: 0 0.15em;
-  box-decoration-break: clone;
-  -webkit-box-decoration-break: clone;
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.animate-float {
+  animation: float 6s ease-in-out infinite;
 }
 
-/* rubber stamp */
-.stamp {
-  font-family: var(--font-plex-mono), monospace;
-  border: 3px double var(--redpen);
-  color: var(--redpen);
-  letter-spacing: 0.18em;
-  transform: rotate(-8deg);
-  opacity: 0.85;
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.9 0.05'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+@keyframes blink {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
 }
-
-/* paper card: hard rule + offset ink shadow, like a photocopied hand-out */
-.paper-card {
-  background: #fffef9;
-  border: 1.5px solid var(--ink);
-  box-shadow: 5px 5px 0 0 var(--ink);
-}
-
-/* red-pen underline for corrections */
-.redline {
-  text-decoration: underline wavy var(--redpen) 2px;
-  text-underline-offset: 5px;
-}
+.dot-blink { animation: blink 1.4s ease-in-out infinite; }
+.dot-blink-2 { animation: blink 1.4s ease-in-out 0.25s infinite; }
+.dot-blink-3 { animation: blink 1.4s ease-in-out 0.5s infinite; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

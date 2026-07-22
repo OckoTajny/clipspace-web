@@ -1,8 +1,7 @@
 <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="64" height="64" rx="14" fill="#FAF8F2"/>
-  <rect x="1" y="1" width="62" height="62" rx="13" stroke="#1C1914" stroke-width="2" fill="none"/>
-  <path d="M25 57 L25 44.5 L18.5 44.5 C12.7 44.5 8.8 40.6 8.8 34.8 L8.8 18.9 C8.8 13.1 12.7 9.2 18.5 9.2 L45 9.2 C50.8 9.2 54.7 13.1 54.7 18.9 L54.7 34.8 C54.7 40.6 50.8 44.5 45 44.5 L35.3 44.5 C28.2 44.5 22.9 40.1 22.9 33.9 L22.9 25.1 C22.9 21.2 25.5 18.9 29.5 18.9 L42.3 18.9 C45.8 18.9 47.6 21.1 47.6 24.2 L47.6 28.6" stroke="#7C8391" stroke-width="4.9" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="30.2" cy="31.7" r="2.6" fill="#1C1914"/>
-  <circle cx="37.7" cy="31.7" r="2.6" fill="#1C1914"/>
-  <circle cx="45.2" cy="31.7" r="2.6" fill="#1C1914" opacity="0.45"/>
+  <rect width="64" height="64" rx="14" fill="#131F1A"/>
+  <path d="M25 57 L25 44.5 L18.5 44.5 C12.7 44.5 8.8 40.6 8.8 34.8 L8.8 18.9 C8.8 13.1 12.7 9.2 18.5 9.2 L45 9.2 C50.8 9.2 54.7 13.1 54.7 18.9 L54.7 34.8 C54.7 40.6 50.8 44.5 45 44.5 L35.3 44.5 C28.2 44.5 22.9 40.1 22.9 33.9 L22.9 25.1 C22.9 21.2 25.5 18.9 29.5 18.9 L42.3 18.9 C45.8 18.9 47.6 21.1 47.6 24.2 L47.6 28.6" stroke="#D9A441" stroke-width="4.9" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="30.2" cy="31.7" r="2.6" fill="#F2EDE0"/>
+  <circle cx="37.7" cy="31.7" r="2.6" fill="#F2EDE0"/>
+  <circle cx="45.2" cy="31.7" r="2.6" fill="#F2EDE0" opacity="0.45"/>
 </svg>

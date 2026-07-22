@@ -1,11 +1,11 @@
 // Clipspace logo — a speech bubble bent from a single paperclip wire.
 // The wire enters at the tail, wraps the bubble, and curls inward like
-// a paperclip coil. Steel-colored, like an actual paperclip. Dots = typing.
+// a paperclip coil. Brass wire, cream dots.
 
 export function LogoIcon({
   size = 48,
-  wire = "#7C8391",
-  dots = "#1C1914",
+  wire = "#D9A441",
+  dots = "#F2EDE0",
 }: {
   size?: number;
   wire?: string;
@@ -54,9 +54,9 @@ export function LogoIcon({
 
 export function Wordmark({ className = "" }: { className?: string }) {
   return (
-    <span className={`font-display font-semibold tracking-tight lowercase ${className}`}>
-      <span className="text-ink">clip</span>
-      <span className="text-steel">space</span>
+    <span className={`font-display font-bold tracking-tight lowercase ${className}`}>
+      <span className="text-cream">clip</span>
+      <span className="text-brass">space</span>
     </span>
   );
 }

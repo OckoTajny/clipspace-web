@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Mono, Libre_Franklin } from "next/font/google";
+import { Bricolage_Grotesque, Instrument_Sans } from "next/font/google";
 import "./globals.css";
 
-const plexMono = IBM_Plex_Mono({
-  variable: "--font-plex-mono",
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-bricolage",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
 });
 
-const franklin = Libre_Franklin({
-  variable: "--font-franklin",
+const instrument = Instrument_Sans({
+  variable: "--font-body",
   subsets: ["latin"],
 });
 
@@ -27,7 +26,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${franklin.variable} ${plexMono.variable} h-full antialiased`}
+      className={`${instrument.variable} ${bricolage.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
