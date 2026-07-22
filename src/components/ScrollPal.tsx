@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 
-// Desktop-only scroll guide: the clip pal stays on screen and glides side to
-// side as you scroll, tapping his leg (walk bob) while he moves, blinking,
-// and commenting on whichever section you're looking at.
+// Desktop-only scroll guide: the clip pal flows continuously through the page
+// as you scroll — his position is interpolated between section stops, so he
+// glides across the screen in sync with the scrollbar instead of teleporting.
+// He taps his leg while moving, blinks, and comments on the nearest section.
 // (Placeholder lines — the user will replace them.)
 const STOPS = [
   { id: "hero", side: "left" as const, line: "hey — i'm the paperclip. i hold this whole thing together." },
@@ -14,11 +15,15 @@ const STOPS = [
   { id: "contact", side: "left" as const, line: "that's the tour. built with a paperclip and stubbornness." },
 ];
 
+const PAL_W = 64;
+const PAL_H = 102;
+const EDGE = 48; // keep him (and his bubble) comfortably on screen
+
 function PalFace({ walking }: { walking: boolean }) {
   return (
     <svg
-      width="44"
-      height="70"
+      width={PAL_W}
+      height={PAL_H}
       viewBox="0 0 50 80"
       fill="none"
       aria-hidden
@@ -39,54 +44,94 @@ export default function ScrollPal() {
   const [line, setLine] = useState(STOPS[0].line);
   const [facing, setFacing] = useState<1 | -1>(1);
   const [walking, setWalking] = useState(false);
+  const [onLeftHalf, setOnLeftHalf] = useState(true);
 
-  const curX = useRef(14);
-  const targetX = useRef(14);
-  const activeIdx = useRef(-1);
+  const curX = useRef(EDGE);
+  const targetX = useRef(EDGE);
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    const leftX = () => 14;
-    const rightX = () => window.innerWidth - 58;
+    const leftX = () => EDGE;
+    const rightX = () => window.innerWidth - PAL_W - EDGE;
 
-    const pickStop = () => {
+    // Where should he be for the current scroll position? Interpolate between
+    // the two stops whose section centers straddle the viewport center.
+    const computeTarget = () => {
       const vc = window.innerHeight / 2;
-      let best = 0;
-      let bestDist = Infinity;
-      STOPS.forEach((s, i) => {
+      const pts: { center: number; x: number; line: string }[] = [];
+      for (const s of STOPS) {
         const el = document.getElementById(s.id);
-        if (!el) return;
+        if (!el) continue;
         const r = el.getBoundingClientRect();
-        const c = r.top + r.height / 2;
-        const d = Math.abs(c - vc);
-        if (d < bestDist) {
-          bestDist = d;
-          best = i;
-        }
-      });
-      if (best !== activeIdx.current) {
-        activeIdx.current = best;
-        const s = STOPS[best];
-        targetX.current = s.side === "left" ? leftX() : rightX();
-        setLine(s.line);
+        pts.push({
+          center: r.top + r.height / 2,
+          x: s.side === "left" ? leftX() : rightX(),
+          line: s.line,
+        });
       }
+      if (pts.length === 0) return;
+
+      let x = pts[pts.length - 1].x;
+      let nearLine = pts[pts.length - 1].line;
+      // the footer can never reach the viewport center, so treat "scrolled
+      // to the bottom" as arriving at the last stop
+      const atBottom =
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 2;
+      if (atBottom) {
+        // keep x/nearLine at the last stop
+      } else if (vc <= pts[0].center) {
+        x = pts[0].x;
+        nearLine = pts[0].line;
+      } else {
+        for (let i = 0; i < pts.length - 1; i++) {
+          const a = pts[i];
+          const b = pts[i + 1];
+          if (vc >= a.center && vc <= b.center) {
+            const t = (vc - a.center) / Math.max(b.center - a.center, 1);
+            x = a.x + (b.x - a.x) * t;
+            nearLine = t < 0.5 ? a.line : b.line;
+            break;
+          }
+        }
+      }
+      targetX.current = x;
+      setLine(nearLine);
     };
 
     let raf = 0;
-    let walkTimer: ReturnType<typeof setTimeout>;
-    const onScroll = () => {
-      pickStop();
-      setWalking(true);
-      clearTimeout(walkTimer);
-      walkTimer = setTimeout(() => setWalking(false), 240);
-    };
+    let wasWalking = false;
+    let lastFacing: 1 | -1 = 1;
+    let wasLeftHalf = true;
 
     const loop = () => {
       const dx = targetX.current - curX.current;
-      if (Math.abs(dx) > 0.5) {
-        curX.current += dx * 0.12;
-        setFacing(dx > 0 ? 1 : -1);
+      // gentle ease with a speed cap so crossing the screen reads as a
+      // stroll, never a teleport
+      let step = dx * 0.06;
+      const MAX = 5;
+      if (step > MAX) step = MAX;
+      if (step < -MAX) step = -MAX;
+
+      const moving = Math.abs(dx) > 0.5;
+      if (moving) {
+        curX.current += step;
+        const f: 1 | -1 = dx > 0 ? 1 : -1;
+        if (f !== lastFacing) {
+          lastFacing = f;
+          setFacing(f);
+        }
+      }
+      const isWalking = Math.abs(step) > 0.4;
+      if (isWalking !== wasWalking) {
+        wasWalking = isWalking;
+        setWalking(isWalking);
+      }
+      const leftHalf = curX.current + PAL_W / 2 < window.innerWidth / 2;
+      if (leftHalf !== wasLeftHalf) {
+        wasLeftHalf = leftHalf;
+        setOnLeftHalf(leftHalf);
       }
       if (wrapRef.current) {
         wrapRef.current.style.transform = `translate(${curX.current}px, -50%)`;
@@ -94,34 +139,32 @@ export default function ScrollPal() {
       raf = requestAnimationFrame(loop);
     };
 
-    pickStop();
+    computeTarget();
     curX.current = targetX.current;
     raf = requestAnimationFrame(loop);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", pickStop);
+    window.addEventListener("scroll", computeTarget, { passive: true });
+    window.addEventListener("resize", computeTarget);
 
     return () => {
       cancelAnimationFrame(raf);
-      clearTimeout(walkTimer);
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", pickStop);
+      window.removeEventListener("scroll", computeTarget);
+      window.removeEventListener("resize", computeTarget);
     };
   }, []);
 
-  // pal faces its walking direction; the bubble sits on the inward side
-  const bubbleInwardRight = facing === 1;
-
+  // bubble always points toward the middle of the screen, so it can never
+  // hang off the edge
   return (
     <div
       ref={wrapRef}
       className="pointer-events-none fixed left-0 top-1/2 z-40 hidden xl:block"
-      style={{ transform: "translate(14px, -50%)" }}
+      style={{ transform: `translate(${EDGE}px, -50%)` }}
       aria-hidden
     >
       <div className="relative">
         <div
-          className={`absolute top-1/2 w-max max-w-[220px] -translate-y-1/2 rounded-2xl border border-line bg-surface px-3.5 py-2 text-xs leading-relaxed text-cream shadow-lg ${
-            bubbleInwardRight ? "left-[52px] rounded-bl-md" : "right-[52px] rounded-br-md"
+          className={`absolute top-1/2 w-max max-w-[280px] -translate-y-1/2 rounded-2xl border border-line bg-surface px-4 py-2.5 text-sm leading-relaxed text-cream shadow-lg ${
+            onLeftHalf ? "left-[76px] rounded-bl-md" : "right-[76px] rounded-br-md"
           }`}
         >
           {line}
