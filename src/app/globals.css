@@ -126,6 +126,15 @@ html {
   animation: pal-blink 5s ease-in-out infinite;
 }
 
+/* one-legged hop for the walking pal */
+@keyframes pal-hop {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  20% { transform: translateY(-7px) rotate(-5deg); }
+  45% { transform: translateY(0) rotate(0deg); }
+  70% { transform: translateY(-5px) rotate(4deg); }
+}
+.pal-hop { animation: pal-hop 0.62s ease-in-out infinite; transform-origin: 50% 92%; }
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .reveal-ready [data-reveal],
