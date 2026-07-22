@@ -149,9 +149,10 @@ export default function Home() {
               <span className="text-brass">Your keys.</span>
             </h1>
             <p className="mt-6 max-w-md text-lg leading-relaxed text-muted">
-              Clipspace is a social network that belongs to the people using it.
-              End-to-end encrypted, fully open source, free forever. No ads, no
-              tracking, no big tech reading over your shoulder.
+              Clipspace is a social network that belongs to the people on it.
+              Everything is encrypted end to end, the code is public, and it
+              costs nothing. We couldn&apos;t read your messages if we tried,
+              which is exactly the point.
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
               <a
@@ -210,9 +211,9 @@ export default function Home() {
       {/* features */}
       <section id="features" className="mx-auto max-w-6xl px-6 py-20">
         <h2 className="font-display text-center text-3xl font-bold md:text-4xl">
-          Everything a social network should be.
+          A place to talk to people you like.
           <br />
-          <span className="text-muted">Nothing it shouldn&apos;t.</span>
+          <span className="text-muted">That&apos;s it. That&apos;s the product.</span>
         </h2>
         <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           <Feature icon="lock" title="End-to-end encrypted">
@@ -220,8 +221,8 @@ export default function Home() {
             never leave your pocket, so nobody in between can read a thing.
           </Feature>
           <Feature icon="code" title="100% open source">
-            All of it: clients, server, crypto. Audit it, fork it, break it,
-            fix it. Trust that&apos;s verified, not promised.
+            All of it: clients, server, crypto. You don&apos;t have to trust
+            us. Read the code, or find someone who did.
           </Feature>
           <Feature icon="free" title="Free forever">
             No ads, no premium tiers for privacy, no selling your attention.
