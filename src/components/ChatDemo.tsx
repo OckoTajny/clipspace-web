@@ -4,10 +4,10 @@ import { useEffect, useRef, useState } from "react";
 
 type Msg = { who: "them" | "me"; text: string };
 
-// A looping, scripted conversation. "me" lines are typed out live in the
-// input box below, then "sent"; "them" lines arrive with a typing indicator.
-// Sprinkled with paperclip / Clippy easter eggs.
-const SCRIPT: Msg[] = [
+// The same conversation, told two ways — a straight version and a gen-z
+// version — looping and alternating between them. "me" lines are typed out
+// live in the input box, then "sent"; "them" lines arrive with a typing dot.
+const CLASSIC: Msg[] = [
   { who: "them", text: "ok real question. ads in here?" },
   { who: "me", text: "none. you're not the product this time" },
   { who: "them", text: "my old group chat literally put an ad in the middle of a family argument" },
@@ -16,13 +16,32 @@ const SCRIPT: Msg[] = [
   { who: "me", text: "i can't read it and i built it" },
   { who: "them", text: "even the server?" },
   { who: "me", text: "the server just holds noise. your key is the only thing that turns it back into words" },
-  { who: "them", text: "okay this is unreasonably based" },
+  { who: "them", text: "okay this is unreasonably good" },
   { who: "them", text: "what's the whole paperclip thing about anyway" },
   { who: "me", text: "half Clippy meme, half middle finger to big tech" },
-  { who: "them", text: "😂" },
+  { who: "them", text: "that's a great answer" },
   { who: "me", text: "he holds your stuff together and, unlike some companies, keeps his mouth shut" },
   { who: "them", text: "moving movie night here. i'll bring snacks 🖇️" },
 ];
+
+const GENZ: Msg[] = [
+  { who: "them", text: "ok real q. ads in here?" },
+  { who: "me", text: "nope. you're not the product this time" },
+  { who: "them", text: "my family gc literally dropped an ad mid-argument 😭" },
+  { who: "me", text: "no ads here. not even mid-argument" },
+  { who: "them", text: "wait are we deadass?? no ads at all??" },
+  { who: "me", text: "deadass. zero. i can't even read your messages and i built it" },
+  { who: "them", text: "not even the server??" },
+  { who: "me", text: "server just holds noise. your key is the only thing that turns it back into words" },
+  { who: "them", text: "ok this is lowkey based 💀" },
+  { who: "them", text: "what's the whole paperclip thing anyway" },
+  { who: "me", text: "half Clippy meme, half middle finger to big tech" },
+  { who: "them", text: "💀💀 ok that's fire" },
+  { who: "me", text: "he holds your stuff together and, unlike some companies, keeps his mouth shut" },
+  { who: "them", text: "moving movie night here fr, bringing snacks 🖇️" },
+];
+
+const SCRIPTS = [CLASSIC, GENZ];
 
 const WINDOW = 4;
 const PLACEHOLDER = "Message weekend crew…";
@@ -45,13 +64,14 @@ function Bubble({ who, children }: { who: "them" | "me"; children: React.ReactNo
 
 export default function ChatDemo() {
   const [shown, setShown] = useState<{ m: Msg; key: number }[]>([
-    { m: SCRIPT[0], key: 0 },
-    { m: SCRIPT[1], key: 1 },
+    { m: CLASSIC[0], key: 0 },
+    { m: CLASSIC[1], key: 1 },
   ]);
   const [themTyping, setThemTyping] = useState(false);
   const [inputText, setInputText] = useState("");
   const [sendPressed, setSendPressed] = useState(false);
-  const idx = useRef(2);
+  const idx = useRef(2); // position within the current script
+  const scriptRef = useRef(0); // which script (0 = classic, 1 = gen-z)
   const nextKey = useRef(2);
   const inputRef = useRef<HTMLDivElement>(null);
 
@@ -64,7 +84,7 @@ export default function ChatDemo() {
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setShown(SCRIPT.slice(0, 3).map((m, i) => ({ m, key: i })));
+      setShown(CLASSIC.slice(0, 3).map((m, i) => ({ m, key: i })));
       return;
     }
 
@@ -91,7 +111,12 @@ export default function ChatDemo() {
     const run = async () => {
       await wait(1600);
       while (!cancelled) {
-        const next = SCRIPT[idx.current % SCRIPT.length];
+        // reached the end of a script → switch to the other one
+        if (idx.current >= SCRIPTS[scriptRef.current].length) {
+          scriptRef.current = (scriptRef.current + 1) % SCRIPTS.length;
+          idx.current = 0;
+        }
+        const next = SCRIPTS[scriptRef.current][idx.current];
         if (next.who === "them") {
           setThemTyping(true);
           await wait(1050);
