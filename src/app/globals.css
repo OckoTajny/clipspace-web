@@ -106,6 +106,25 @@ html {
 }
 .type-caret { animation: caret-blink 1s steps(1) infinite; }
 
+/* the clip pal, alive: a gentle sway and an occasional blink */
+@keyframes pal-wiggle {
+  0%, 100% { transform: rotate(-2.5deg); }
+  50% { transform: rotate(2.5deg); }
+}
+.pal-wiggle {
+  animation: pal-wiggle 4.5s ease-in-out infinite;
+  transform-origin: 50% 88%;
+}
+@keyframes pal-blink {
+  0%, 88%, 100% { transform: scaleY(1); }
+  92%, 96% { transform: scaleY(0.1); }
+}
+.pal-eye {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pal-blink 5s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .reveal-ready [data-reveal],

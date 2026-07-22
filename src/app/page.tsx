@@ -74,18 +74,27 @@ function Feature({
   );
 }
 
-/* the clip pal – brass wire, cream eyes */
+/* the clip pal – a whole brass paperclip with a face, alive with a
+   gentle sway and the odd blink */
 function PaperclipPal({ size = 72 }: { size?: number }) {
   return (
-    <svg width={size} height={size * 1.4} viewBox="0 0 50 70" fill="none" aria-hidden>
+    <svg
+      width={size}
+      height={size * 1.5}
+      viewBox="0 0 52 78"
+      fill="none"
+      aria-hidden
+      className="pal-wiggle"
+    >
+      <rect x="13" y="7" width="26" height="64" rx="13" stroke="#D9A441" strokeWidth="5" />
       <path
-        d="M15 62 L15 14 C15 7 19 3 25 3 C31 3 35 7 35 14 L35 50 C35 55 32 58 28 58 C24 58 21 55 21 50 L21 20"
+        d="M22 23 L22 50 C22 56 24.5 59 26 59 C27.5 59 30 56 30 50 L30 23"
         stroke="#D9A441"
         strokeWidth="5"
         strokeLinecap="round"
       />
-      <circle cx="22" cy="12" r="2.4" fill="#F2EDE0" />
-      <circle cx="30" cy="12" r="2.4" fill="#F2EDE0" />
+      <circle className="pal-eye" cx="21.5" cy="15" r="2.4" fill="#F2EDE0" />
+      <circle className="pal-eye" cx="30.5" cy="15" r="2.4" fill="#F2EDE0" />
     </svg>
   );
 }
@@ -209,8 +218,10 @@ export default function Home() {
       {/* why */}
       <section id="why" className="border-y border-line bg-surface">
         <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-20 md:grid-cols-[auto_1fr]">
-          <div className="mx-auto animate-float" data-reveal>
-            <PaperclipPal size={90} />
+          <div className="mx-auto" data-reveal>
+            <div className="animate-float">
+              <PaperclipPal size={90} />
+            </div>
           </div>
           <div data-reveal>
             <h2 className="font-display text-3xl font-bold md:text-4xl">
