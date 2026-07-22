@@ -3,23 +3,29 @@
 import { useEffect, useRef, useState } from "react";
 import PalSvg from "./PalSvg";
 
-// Desktop-only scroll guide, scrollytelling style: the pal's position is a
-// smooth function of scroll progress. Between stops he sweeps across the
-// screen on a gentle arc, leans into his stride and steps with his leg.
-// He parks in the empty gutter beside the content column so he never sits
-// on top of text, and his speech bubble pops on arrival, stays long enough
-// to read, then fades away so nothing stays covered.
-// (Placeholder lines — the user will replace them.)
+// Desktop-only scroll guide, scrollytelling style.
+//
+// The pal follows a hand-authored PATH: each section has a waypoint — a side
+// (which gutter he parks in) and a height (where on the screen he stands).
+// As you scroll he travels between waypoints along a gentle arc, leaning into
+// his stride and stepping with his leg, so it reads like a designed route
+// rather than a sprite sliding on a rail.
+//
+// He always parks in the empty gutter beside the content column, sized to fit
+// that gutter, so he never stands on top of text or a button. His speech
+// bubble types out on arrival and stays up until he sets off for the next
+// stop. (Placeholder lines — the user will replace them.)
 const STOPS = [
-  { id: "hero", side: "left" as const, line: "hey — i'm the paperclip. i hold this whole thing together." },
-  { id: "features", side: "right" as const, line: "no ads, no tracking, no catch. all of it, yours." },
-  { id: "why", side: "left" as const, line: "remember when software was on your side? same." },
-  { id: "opensource", side: "right" as const, line: "every line is public. read it, fork it, trust it." },
-  { id: "contact", side: "left" as const, line: "that's the tour. built with a paperclip and stubbornness." },
+  { id: "hero", side: "left" as const, y: 0.5, line: "hey — i'm the paperclip. i hold this whole thing together." },
+  { id: "features", side: "right" as const, y: 0.38, line: "no ads, no tracking, no catch. all of it, yours." },
+  { id: "why", side: "left" as const, y: 0.55, line: "remember when software was on your side? same." },
+  { id: "opensource", side: "right" as const, y: 0.42, line: "every line is public. read it, fork it, trust it." },
+  { id: "contact", side: "left" as const, y: 0.5, line: "that's the tour. built with a paperclip and stubbornness." },
 ];
 
-const CONTENT_W = 1152; // max-w-6xl — the pal parks in the gutter beside it
-const BUBBLE_MS = 6500; // how long a line stays up before fading out
+const CONTENT_W = 1152; // max-w-6xl — the pal lives in the gutter beside it
+const GAP = 12; // clearance between the pal and the content column
+const EDGE = 8; // clearance from the screen edge
 
 export default function ScrollPal() {
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -39,40 +45,50 @@ export default function ScrollPal() {
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
+    // width of the empty margin on each side of the centered content box
     const gutter = () => Math.max(0, (window.innerWidth - CONTENT_W) / 2);
 
     const sizePal = () => {
-      // full size when the gutter can hold him, a notch smaller on narrow
-      // desktops so he still fits beside the content
-      const w = gutter() >= 104 ? 88 : 66;
+      // as big as the gutter can hold, within a sensible range
+      const room = gutter() - GAP - EDGE;
+      const w = Math.max(46, Math.min(92, Math.floor(room)));
       if (w !== palWRef.current) {
         palWRef.current = w;
         setPalW(w);
       }
     };
 
-    const parkLeft = () => Math.max(6, (gutter() - palWRef.current) / 2);
-    const parkRight = () => window.innerWidth - palWRef.current - parkLeft();
+    // park just outside the content box: his content-facing edge stops a
+    // GAP short of it, so text and buttons are never covered
+    const parkLeft = () =>
+      Math.max(EDGE, gutter() - GAP - palWRef.current);
+    const parkRight = () =>
+      Math.min(
+        window.innerWidth - EDGE - palWRef.current,
+        window.innerWidth - gutter() + GAP,
+      );
+
+    const stopX = (s: (typeof STOPS)[number]) =>
+      s.side === "left" ? parkLeft() : parkRight();
+    // vertical offset from screen center for a waypoint's height anchor
+    const stopY = (s: (typeof STOPS)[number]) =>
+      (s.y - 0.5) * window.innerHeight;
 
     const computeTarget = () => {
       sizePal();
       const vc = window.innerHeight / 2;
-      const pts: { center: number; x: number; stop: (typeof STOPS)[number] }[] = [];
+      const pts: { center: number; stop: (typeof STOPS)[number] }[] = [];
       for (const s of STOPS) {
         const el = document.getElementById(s.id);
         if (!el) continue;
         const r = el.getBoundingClientRect();
-        pts.push({
-          center: r.top + r.height / 2,
-          x: s.side === "left" ? parkLeft() : parkRight(),
-          stop: s,
-        });
+        pts.push({ center: r.top + r.height / 2, stop: s });
       }
       if (pts.length === 0) return;
 
-      let x = pts[pts.length - 1].x;
-      let y = 0;
       let near = pts[pts.length - 1].stop;
+      let x = stopX(near);
+      let y = stopY(near);
       // the footer can never reach the viewport center, so treat "scrolled
       // to the bottom" as arriving at the last stop
       const atBottom =
@@ -81,8 +97,9 @@ export default function ScrollPal() {
       if (atBottom) {
         // settled at the last stop
       } else if (vc <= pts[0].center) {
-        x = pts[0].x;
         near = pts[0].stop;
+        x = stopX(near);
+        y = stopY(near);
       } else {
         for (let i = 0; i < pts.length - 1; i++) {
           const a = pts[i];
@@ -90,9 +107,13 @@ export default function ScrollPal() {
           if (vc >= a.center && vc <= b.center) {
             let t = (vc - a.center) / Math.max(b.center - a.center, 1);
             near = t < 0.5 ? a.stop : b.stop;
-            t = t * t * (3 - 2 * t); // smoothstep: rest at stops, sweep between
-            x = a.x + (b.x - a.x) * t;
-            y = -Math.sin(t * Math.PI) * 22; // gentle arc between stops
+            t = t * t * (3 - 2 * t); // smoothstep: rest at stops, glide between
+            const ax = stopX(a.stop);
+            const bx = stopX(b.stop);
+            const ay = stopY(a.stop);
+            const by = stopY(b.stop);
+            x = ax + (bx - ax) * t;
+            y = ay + (by - ay) * t - Math.sin(t * Math.PI) * 26; // arced hop
             break;
           }
         }
@@ -104,7 +125,6 @@ export default function ScrollPal() {
 
     let raf = 0;
     let wasWalking = true; // start "walking" so the first idle frame counts as an arrival
-    let hideTimer: ReturnType<typeof setTimeout> | undefined;
     let typeTimer: ReturnType<typeof setTimeout> | undefined;
 
     const loop = () => {
@@ -117,7 +137,7 @@ export default function ScrollPal() {
       if (step > MAX) step = MAX;
       if (step < -MAX) step = -MAX;
       if (Math.abs(dx) > 0.4) c.x += step;
-      c.y += (target.current.y - c.y) * 0.12;
+      c.y += (target.current.y - c.y) * 0.1;
 
       // lean into the stride, straighten out when idle
       const leanTarget = Math.max(-9, Math.min(9, step * 1.6));
@@ -128,19 +148,16 @@ export default function ScrollPal() {
       if (isWalking !== wasWalking) {
         wasWalking = isWalking;
         setWalking(isWalking);
-        clearTimeout(hideTimer);
         clearTimeout(typeTimer);
         if (isWalking) {
-          // tuck the bubble away while he's on the move
+          // he sets off — put the bubble away until he arrives
           setBubbleOn(false);
         } else {
-          // arrived: pop the bubble with typing dots, then the line,
-          // let it sit long enough to read, then fade it out
+          // arrived: type out the line, then hold it until he leaves again
           setBubbleOn(true);
           setTyping(true);
           setArrivalId((n) => n + 1);
-          typeTimer = setTimeout(() => setTyping(false), 900);
-          hideTimer = setTimeout(() => setBubbleOn(false), BUBBLE_MS);
+          typeTimer = setTimeout(() => setTyping(false), 850);
         }
       }
 
@@ -163,7 +180,6 @@ export default function ScrollPal() {
 
     return () => {
       cancelAnimationFrame(raf);
-      clearTimeout(hideTimer);
       clearTimeout(typeTimer);
       window.removeEventListener("scroll", computeTarget);
       window.removeEventListener("resize", computeTarget);
@@ -178,9 +194,8 @@ export default function ScrollPal() {
       aria-hidden
     >
       <div className="relative">
-        {/* sits up by his head; pops on arrival (key remount) with typing
-            dots first, then the line, and fades out after a few seconds so
-            it never keeps covering the page */}
+        {/* sits up by his head; types on arrival (key remount), then holds
+            the line until he walks off to the next stop */}
         <div
           className="absolute -translate-y-1/2"
           style={{
