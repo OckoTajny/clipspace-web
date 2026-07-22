@@ -52,8 +52,8 @@ function Bubble({ who, children }: { who: "them" | "me"; children: React.ReactNo
       <div
         className={`msg-in max-w-[78%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
           who === "me"
-            ? "bg-brass text-bg rounded-br-md font-medium"
-            : "bg-surface-2 text-cream rounded-bl-md"
+            ? "origin-bottom-right rounded-br-md bg-brass font-medium text-bg"
+            : "origin-bottom-left rounded-bl-md bg-surface-2 text-cream"
         }`}
       >
         {children}
@@ -167,7 +167,7 @@ export default function ChatDemo() {
       <div className="flex items-center gap-2">
         <div
           ref={inputRef}
-          className="flex-1 overflow-hidden whitespace-nowrap rounded-full border border-line px-4 py-2.5 text-sm"
+          className="min-w-0 flex-1 overflow-hidden whitespace-nowrap rounded-full border border-line px-4 py-2.5 text-sm"
         >
           {inputText ? (
             <span className="text-cream">

@@ -97,7 +97,8 @@ html {
 }
 .msg-in {
   animation: msg-in 0.42s cubic-bezier(0.22, 0.85, 0.3, 1) both;
-  transform-origin: bottom center;
+  /* origin is set per side (origin-bottom-left / -right) so the pop never
+     grows past the card edge and clips */
 }
 
 @keyframes caret-blink {
