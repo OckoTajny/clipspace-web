@@ -10,17 +10,17 @@ type Msg = { who: "them" | "me"; text: string };
 const SCRIPT: Msg[] = [
   { who: "them", text: "ok real question. ads in here?" },
   { who: "me", text: "none. you're not the product this time" },
-  { who: "them", text: "my family group chat just showed me an ad mid-argument" },
-  { who: "me", text: "yeah. we don't do that" },
+  { who: "them", text: "my old group chat literally put an ad in the middle of a family argument" },
+  { who: "me", text: "yeah, that's the app you're leaving. not this one" },
   { who: "them", text: "and nobody can read this? like actually?" },
   { who: "me", text: "i can't read it and i built it" },
   { who: "them", text: "even the server?" },
   { who: "me", text: "the server just holds noise. your key is the only thing that turns it back into words" },
   { who: "them", text: "okay this is unreasonably based" },
-  { who: "them", text: "what's with the paperclip though" },
-  { who: "me", text: "he holds your stuff together and stays out of your business" },
-  { who: "them", text: "so… the anti-clippy" },
-  { who: "me", text: "he read the room. clippy never did" },
+  { who: "them", text: "what's the whole paperclip thing about anyway" },
+  { who: "me", text: "half Clippy meme, half middle finger to big tech" },
+  { who: "them", text: "😂" },
+  { who: "me", text: "he holds your stuff together and, unlike some companies, keeps his mouth shut" },
   { who: "them", text: "moving movie night here. i'll bring snacks 🖇️" },
 ];
 
