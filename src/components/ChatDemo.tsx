@@ -25,9 +25,9 @@ const CLASSIC: Msg[] = [
 ];
 
 const GENZ: Msg[] = [
-  { who: "them", text: "ok real q. ads in here?" },
+  { who: "them", text: "ok real question. ads in here?" },
   { who: "me", text: "nope. you're not the product this time" },
-  { who: "them", text: "my family gc literally dropped an ad mid-argument 😭" },
+  { who: "them", text: "my family group chat literally dropped an ad mid-argument 😭" },
   { who: "me", text: "no ads here. not even mid-argument" },
   { who: "them", text: "wait are we deadass?? no ads at all??" },
   { who: "me", text: "deadass. zero. i built the whole thing and i still can't read your messages" },
