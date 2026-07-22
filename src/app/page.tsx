@@ -1,30 +1,7 @@
 import { Logo, LogoIcon } from "@/components/Logo";
+import ChatDemo from "@/components/ChatDemo";
 
 /* ---------- small building blocks ---------- */
-
-function ChatBubble({
-  side,
-  children,
-  tone = "them",
-}: {
-  side: "left" | "right";
-  children: React.ReactNode;
-  tone?: "them" | "me";
-}) {
-  return (
-    <div className={`flex ${side === "right" ? "justify-end" : "justify-start"}`}>
-      <div
-        className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
-          tone === "me"
-            ? "bg-brass text-bg rounded-br-md font-medium"
-            : "bg-surface-2 text-cream rounded-bl-md"
-        }`}
-      >
-        {children}
-      </div>
-    </div>
-  );
-}
 
 /* tiny brass line icons – primitives only, no icon font */
 function FeatureIcon({ kind }: { kind: string }) {
@@ -188,18 +165,7 @@ export default function Home() {
                   e2ee
                 </span>
               </div>
-              <div className="flex flex-col gap-3 py-5">
-                <ChatBubble side="left">so… no ads in here? ever?</ChatBubble>
-                <ChatBubble side="right" tone="me">
-                  ever. and nobody can read this – not even the server
-                </ChatBubble>
-                <ChatBubble side="left">okay this is what the internet was supposed to be</ChatBubble>
-                <div className="flex items-center gap-1.5 pl-2 pt-1">
-                  <span className="dot-blink h-2 w-2 rounded-full bg-muted" />
-                  <span className="dot-blink-2 h-2 w-2 rounded-full bg-muted" />
-                  <span className="dot-blink-3 h-2 w-2 rounded-full bg-muted" />
-                </div>
-              </div>
+              <ChatDemo />
               <div className="flex items-center gap-2">
                 <div className="flex-1 rounded-full border border-line px-4 py-2.5 text-sm text-muted">
                   Message weekend crew…
