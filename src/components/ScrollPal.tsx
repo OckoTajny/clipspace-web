@@ -138,27 +138,33 @@ export default function ScrollPal() {
       const h = window.innerHeight;
       const vc = h / 2;
 
-      // nearest section center wins, with hysteresis so slow scrolling
-      // around a midpoint doesn't ping-pong him back and forth
-      let best: { stop: (typeof STOPS)[number]; d: number } | null = null;
-      let curD = Infinity;
+      // deterministic: he belongs to whichever section the middle of the
+      // screen is inside — the divider between two sections is the exact
+      // switch point, the same in both scroll directions, no in-between zone
+      let near: (typeof STOPS)[number] | null = null;
+      let fallback = STOPS[0];
+      let bestD = Infinity;
       for (const s of STOPS) {
         const el = document.getElementById(s.id);
         if (!el) continue;
         const r = el.getBoundingClientRect();
-        const d = Math.abs(r.top + r.height / 2 - vc);
-        if (s.id === nearRef.current.id) curD = d;
-        if (!best || d < best.d) best = { stop: s, d };
+        if (vc >= r.top && vc <= r.bottom) {
+          near = s;
+          break;
+        }
+        // center sits in a gap or past the ends — nearest section edge wins
+        const d = Math.min(Math.abs(r.top - vc), Math.abs(r.bottom - vc));
+        if (d < bestD) {
+          bestD = d;
+          fallback = s;
+        }
       }
-      if (!best) return;
-
-      let near = nearRef.current;
+      if (near === null) near = fallback;
       // the footer can never reach the viewport center, so treat "scrolled
       // to the bottom" as arriving at the last stop
       const atBottom =
         h + window.scrollY >= document.documentElement.scrollHeight - 2;
       if (atBottom) near = STOPS[STOPS.length - 1];
-      else if (curD === Infinity || best.d < curD - h * 0.12) near = best.stop;
 
       target.current = { x: stopX(near), y: (near.y - 0.5) * h };
       nearRef.current = near;
