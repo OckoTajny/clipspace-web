@@ -23,7 +23,7 @@ const STOPS = [
     side: "left" as const,
     y: 0.5,
     lines: [
-      "hey — i'm the paperclip. i hold this whole thing together.",
+      "hey — i'm clip pal. i hold this whole thing together.",
       "it looks like you're trying to leave big tech. want a hand?",
       "one clip, zero data harvested. good start, right?",
     ],
