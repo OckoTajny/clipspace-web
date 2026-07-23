@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import PalSvg from "./PalSvg";
 
 // Desktop-only scroll guide.
@@ -84,6 +84,8 @@ export default function ScrollPal() {
   const [walking, setWalking] = useState(false);
   const [palW, setPalW] = useState(88);
   const [bubbleW, setBubbleW] = useState(240);
+  const [bubSize, setBubSize] = useState<{ w: number; h: number } | null>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const target = useRef({ x: 40, y: 0 });
   const cur = useRef({ x: 40, y: 0, lean: 0, facing: 1 as 1 | -1 });
@@ -91,6 +93,14 @@ export default function ScrollPal() {
   const nearRef = useRef(STOPS[0]);
   // first arrival at each stop shows lines[0]; each later visit advances
   const lineIdx = useRef<Record<string, number>>({});
+
+  // measure the bubble's content so the box itself can smoothly grow from
+  // the little typing bubble into the full line (width/height transition)
+  useLayoutEffect(() => {
+    const el = contentRef.current;
+    if (!el) return;
+    setBubSize({ w: el.offsetWidth + 2, h: el.offsetHeight + 2 }); // +2 for the border
+  }, [typing, line, bubbleW, palW, arrivalId]);
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -193,6 +203,7 @@ export default function ScrollPal() {
           lineIdx.current[s.id] = i + 1;
           setBubbleOn(true);
           setTyping(true);
+          setBubSize(null); // fresh bubble starts at the dots' natural size
           setArrivalId((n) => n + 1);
           typeTimer = setTimeout(() => setTyping(false), 850);
         }
@@ -240,28 +251,43 @@ export default function ScrollPal() {
         >
           <div
             key={arrivalId}
-            className={`${bubbleOn ? "pal-say" : "pal-bubble-hide"} relative rounded-2xl border border-line bg-surface px-4 py-2.5 text-sm leading-relaxed text-cream shadow-lg ${
-              leftGutter
-                ? "origin-bottom-right rounded-br-md"
-                : "origin-bottom-left rounded-bl-md"
+            className={`${bubbleOn ? "pal-say" : "pal-bubble-hide"} relative ${
+              leftGutter ? "origin-bottom-right" : "origin-bottom-left"
             }`}
-            style={{
-              width: "max-content",
-              maxWidth: bubbleW,
-              // never narrower than the pal — keeps the tail well inside
-              // the bubble even when it only holds the typing dots
-              minWidth: palW + 8,
-            }}
           >
-            {typing ? (
-              <span className="flex items-center justify-center gap-1 py-1.5">
-                <span className="dot-blink inline-block h-1.5 w-1.5 rounded-full bg-muted" />
-                <span className="dot-blink-2 inline-block h-1.5 w-1.5 rounded-full bg-muted" />
-                <span className="dot-blink-3 inline-block h-1.5 w-1.5 rounded-full bg-muted" />
-              </span>
-            ) : (
-              line
-            )}
+            {/* the box animates its size, so it morphs smoothly from the
+                little typing bubble into the full line */}
+            <div
+              className={`overflow-hidden rounded-2xl border border-line bg-surface shadow-lg transition-[width,height] duration-300 ease-out ${
+                leftGutter ? "ml-auto rounded-br-md" : "rounded-bl-md"
+              }`}
+              style={
+                bubSize ? { width: bubSize.w, height: bubSize.h } : undefined
+              }
+            >
+              {/* content at its natural size — the box above is what's
+                  measured against it and clipped while growing */}
+              <div
+                ref={contentRef}
+                className="w-max px-4 py-2.5 text-sm leading-relaxed text-cream"
+                style={{
+                  maxWidth: bubbleW,
+                  // never narrower than the pal — keeps the tail well
+                  // inside the bubble even with just the typing dots
+                  minWidth: palW + 8,
+                }}
+              >
+                {typing ? (
+                  <span className="flex items-center justify-center gap-1 py-1.5">
+                    <span className="dot-blink inline-block h-1.5 w-1.5 rounded-full bg-muted" />
+                    <span className="dot-blink-2 inline-block h-1.5 w-1.5 rounded-full bg-muted" />
+                    <span className="dot-blink-3 inline-block h-1.5 w-1.5 rounded-full bg-muted" />
+                  </span>
+                ) : (
+                  <span className="pal-line-in">{line}</span>
+                )}
+              </div>
+            </div>
             {/* the tail: a rotated square poking out of the bottom edge,
                 aimed at the pal's head so the bubble clearly comes from him */}
             <span

@@ -168,6 +168,16 @@ html {
 .pal-say {
   animation: pal-say 0.34s cubic-bezier(0.22, 0.85, 0.3, 1) both;
 }
+/* the line fades in while the bubble box grows around it */
+@keyframes pal-line-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.pal-line-in {
+  display: inline-block;
+  animation: pal-line-in 0.3s ease 0.1s both;
+}
+
 /* …and quietly fades away once he's done talking or starts moving */
 .pal-bubble-hide {
   opacity: 0;
