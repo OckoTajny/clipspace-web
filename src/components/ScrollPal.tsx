@@ -240,7 +240,7 @@ export default function ScrollPal() {
         >
           <div
             key={arrivalId}
-            className={`${bubbleOn ? "pal-say" : "pal-bubble-hide"} rounded-2xl border border-line bg-surface px-4 py-2.5 text-sm leading-relaxed text-cream shadow-lg ${
+            className={`${bubbleOn ? "pal-say" : "pal-bubble-hide"} relative rounded-2xl border border-line bg-surface px-4 py-2.5 text-sm leading-relaxed text-cream shadow-lg ${
               leftGutter
                 ? "origin-bottom-right rounded-br-md"
                 : "origin-bottom-left rounded-bl-md"
@@ -256,6 +256,16 @@ export default function ScrollPal() {
             ) : (
               line
             )}
+            {/* the tail: a rotated square poking out of the bottom edge,
+                aimed at the pal's head so the bubble clearly comes from him */}
+            <span
+              className="absolute -bottom-[7px] h-3.5 w-3.5 rotate-45 border-b border-r border-line bg-surface"
+              style={
+                leftGutter
+                  ? { right: Math.max(10, palW / 2 - 7) }
+                  : { left: Math.max(10, palW / 2 - 7) }
+              }
+            />
           </div>
         </div>
         <div ref={palRef}>
