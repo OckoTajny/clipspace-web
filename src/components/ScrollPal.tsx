@@ -50,7 +50,7 @@ const STOPS = [
   },
   {
     id: "opensource",
-    side: "right" as const,
+    side: "left" as const,
     y: 0.44,
     lines: [
       "every line is public. read it, fork it, trust it.",
@@ -60,7 +60,7 @@ const STOPS = [
   },
   {
     id: "contact",
-    side: "left" as const,
+    side: "right" as const,
     y: 0.5,
     lines: [
       "that's the tour. built with a paperclip and stubbornness.",
@@ -172,7 +172,8 @@ export default function ScrollPal() {
     };
 
     let raf = 0;
-    let wasWalking = true; // start "walking" so the first idle frame counts as an arrival
+    let wasWalking = false;
+    let shownStop: string | null = null; // stop whose line the bubble shows
     let typeTimer: ReturnType<typeof setTimeout> | undefined;
 
     const loop = () => {
@@ -196,23 +197,27 @@ export default function ScrollPal() {
       if (isWalking !== wasWalking) {
         wasWalking = isWalking;
         setWalking(isWalking);
-        clearTimeout(typeTimer);
         if (isWalking) {
           // he sets off — put the bubble away until he arrives
+          clearTimeout(typeTimer);
           setBubbleOn(false);
-        } else {
-          // arrived: pick the next line from this stop's pool, type it out,
-          // then hold it until he leaves again
-          const s = nearRef.current;
-          const i = lineIdx.current[s.id] ?? 0;
-          setLine(s.lines[i % s.lines.length]);
-          lineIdx.current[s.id] = i + 1;
-          setBubbleOn(true);
-          setTyping(true);
-          setBubSize(null); // fresh bubble starts at the dots' natural size
-          setArrivalId((n) => n + 1);
-          typeTimer = setTimeout(() => setTyping(false), 850);
+          shownStop = null;
         }
+      }
+      // speak whenever he's standing at a stop he hasn't announced yet —
+      // this also covers two same-side stops, where there's no walk at all
+      if (!isWalking && shownStop !== nearRef.current.id) {
+        const s = nearRef.current;
+        shownStop = s.id;
+        clearTimeout(typeTimer);
+        const i = lineIdx.current[s.id] ?? 0;
+        setLine(s.lines[i % s.lines.length]);
+        lineIdx.current[s.id] = i + 1;
+        setBubbleOn(true);
+        setTyping(true);
+        setBubSize(null); // fresh bubble starts at the dots' natural size
+        setArrivalId((n) => n + 1);
+        typeTimer = setTimeout(() => setTyping(false), 850);
       }
 
       if (wrapRef.current) {
