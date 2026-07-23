@@ -59,13 +59,14 @@ const STOPS = [
     ],
   },
   {
-    id: "contact",
+    id: "news",
     side: "right" as const,
-    y: 0.5,
+    y: 0.46,
     lines: [
+      "fresh off the press: android comes first.",
       "that's the tour. built with a paperclip and stubbornness.",
+      "news travels fast when there are no algorithms.",
       "stick around. or self-host. or both. i'm easy.",
-      "made with one clip and a grudge against ads.",
     ],
   },
 ];

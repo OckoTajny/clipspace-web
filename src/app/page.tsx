@@ -305,6 +305,41 @@ export default function Home() {
         </div>
       </section>
 
+      {/* what's new */}
+      <section id="news" className="border-t border-line bg-surface">
+        <div className="mx-auto max-w-6xl px-6 py-20">
+          <h2 className="font-display text-3xl font-bold md:text-4xl" data-reveal>
+            What&apos;s new?
+          </h2>
+          <div className="mt-10 grid gap-5 md:grid-cols-2" data-reveal-stagger>
+            <div className="rounded-xl border border-line bg-bg p-6">
+              <span className="rounded-full border border-brass/40 px-2.5 py-1 text-xs font-medium text-brass">
+                in progress
+              </span>
+              <h3 className="font-display mt-4 text-lg font-bold">
+                Deep in development
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted">
+                The core of clipspace — encryption, spaces, servers — is being
+                built right now. Follow the repo to watch it take shape.
+              </p>
+            </div>
+            <div className="rounded-xl border border-line bg-bg p-6">
+              <span className="rounded-full border border-brass/40 px-2.5 py-1 text-xs font-medium text-brass">
+                coming soon
+              </span>
+              <h3 className="font-display mt-4 text-lg font-bold">
+                First version for Android
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted">
+                The first clipspace app is headed to Android. Other platforms
+                will follow.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* footer */}
       <footer id="contact" className="border-t border-line">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-6 py-10 text-center">
