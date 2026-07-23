@@ -193,7 +193,7 @@ export default function Home() {
 
       {/* why */}
       <section id="why" className="border-y border-line bg-surface">
-        <div className="mx-auto grid max-w-6xl items-center gap-10 px-6 py-20 md:grid-cols-[auto_1fr] min-[1600px]:grid-cols-1">
+        <div className="mx-auto grid max-w-6xl items-center gap-10 px-6 py-20 md:grid-cols-[auto_1fr] min-[1600px]:grid-cols-2 min-[1600px]:gap-16">
           {/* the clip pal keeps you company here up to 1600px; on wide
               desktops the walking guide passes through instead */}
           <div className="mx-auto md:mx-0 min-[1600px]:hidden" data-reveal>
@@ -220,6 +220,46 @@ export default function Home() {
               looks like you&apos;re trying to talk to your friends in
               private. We can help with that.
             </p>
+          </div>
+          {/* wide screens only: a little 90s assistant window to keep the
+              right half company (the walking pal handles the left gutter) */}
+          <div className="hidden min-[1600px]:block" data-reveal>
+            <div className="rounded-xl border border-line bg-surface-2 shadow-lg">
+              <div className="flex items-center justify-between rounded-t-xl border-b border-line px-4 py-2.5">
+                <p className="font-display text-xs font-bold tracking-wide text-muted">
+                  clipspace assistant
+                </p>
+                <div className="flex gap-1.5">
+                  <span className="h-2.5 w-2.5 rounded-full border border-line" />
+                  <span className="h-2.5 w-2.5 rounded-full border border-line" />
+                  <span className="h-2.5 w-2.5 rounded-full border border-line bg-brass/60" />
+                </div>
+              </div>
+              <div className="flex items-start gap-6 px-7 py-7">
+                <div className="pal-idle shrink-0">
+                  <PalSvg width={46} />
+                </div>
+                <div>
+                  <p className="leading-relaxed">
+                    It looks like you&apos;re trying to leave big tech behind.
+                  </p>
+                  <p className="mt-1 text-sm text-muted">
+                    Would you like help with that?
+                  </p>
+                  <div className="mt-6 flex gap-3">
+                    <a
+                      href="#opensource"
+                      className="font-display whitespace-nowrap rounded-full bg-brass px-4 py-2 text-sm font-bold text-bg transition-colors hover:bg-brass-soft"
+                    >
+                      Yes, help me
+                    </a>
+                    <span className="font-display whitespace-nowrap rounded-full border border-line px-4 py-2 text-sm font-bold text-muted">
+                      Don&apos;t show this again
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
