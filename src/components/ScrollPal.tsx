@@ -3,17 +3,19 @@
 import { useEffect, useRef, useState } from "react";
 import PalSvg from "./PalSvg";
 
-// Desktop-only scroll guide, scrollytelling style.
+// Desktop-only scroll guide.
 //
-// The pal follows a hand-authored PATH: each section has a waypoint — a side
-// (which gutter he parks in) and a height (where on the screen he stands) —
-// plus a little pool of lines he cycles through.
+// He only ever *targets* a parking spot in a side gutter — never a point in
+// between. Whatever the scroll does (anchor clicks, scrubbing, stopping
+// mid-way), when he comes to rest he is standing beside the content, not on
+// it. The walk between spots is a time-based ease in screen space.
 //
-// The trick that keeps him off the content: he stays parked in his gutter for
-// almost the whole section, and only crosses to the other side during the
-// brief window when the gap BETWEEN two sections is at the middle of the
-// screen — i.e. he steps across through empty whitespace, never over text or
-// buttons. Stop scrolling anywhere and he settles in a gutter, never mid-page.
+// The bubble sits ABOVE his head and grows toward the screen edge, so it
+// lives entirely in the gutter and never covers text. It only appears while
+// he stands still.
+//
+// Shown only on screens ≥1600px, where the gutter is wide enough for him
+// and his bubble; below that the static pal in the "why" section takes over.
 // (Placeholder lines — the user will replace them.)
 const STOPS = [
   {
@@ -68,21 +70,20 @@ const STOPS = [
   },
 ];
 
-const CONTENT_W = 1152; // max-w-6xl — the pal lives in the gutter beside it
 const GAP = 12; // clearance between the pal and the content column
 const EDGE = 8; // clearance from the screen edge
-const smooth = (u: number) => u * u * (3 - 2 * u);
 
 export default function ScrollPal() {
   const wrapRef = useRef<HTMLDivElement>(null);
   const palRef = useRef<HTMLDivElement>(null);
   const [line, setLine] = useState(STOPS[0].lines[0]);
-  const [bubbleRight, setBubbleRight] = useState(STOPS[0].side === "left");
+  const [leftGutter, setLeftGutter] = useState(true);
   const [bubbleOn, setBubbleOn] = useState(true);
   const [typing, setTyping] = useState(true);
   const [arrivalId, setArrivalId] = useState(0);
   const [walking, setWalking] = useState(false);
   const [palW, setPalW] = useState(88);
+  const [bubbleW, setBubbleW] = useState(240);
 
   const target = useRef({ x: 40, y: 0 });
   const cur = useRef({ x: 40, y: 0, lean: 0, facing: 1 as 1 | -1 });
@@ -94,8 +95,11 @@ export default function ScrollPal() {
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    // width of the empty margin on each side of the centered content box
-    const gutter = () => Math.max(0, (window.innerWidth - CONTENT_W) / 2);
+    // the content box is 72rem wide and the root font size scales up on big
+    // screens, so measure the rem instead of hardcoding pixels
+    const contentW = () =>
+      72 * parseFloat(getComputedStyle(document.documentElement).fontSize);
+    const gutter = () => Math.max(0, (window.innerWidth - contentW()) / 2);
 
     const sizePal = () => {
       // as big as the gutter can hold, within a sensible range
@@ -105,6 +109,7 @@ export default function ScrollPal() {
         palWRef.current = w;
         setPalW(w);
       }
+      setBubbleW(Math.round(Math.max(150, Math.min(260, gutter() - 20))));
     };
 
     // park just outside the content box: his content-facing edge stops a
@@ -122,70 +127,32 @@ export default function ScrollPal() {
       sizePal();
       const h = window.innerHeight;
       const vc = h / 2;
-      const pts: {
-        center: number;
-        bottom: number;
-        stop: (typeof STOPS)[number];
-      }[] = [];
+
+      // nearest section center wins, with hysteresis so slow scrolling
+      // around a midpoint doesn't ping-pong him back and forth
+      let best: { stop: (typeof STOPS)[number]; d: number } | null = null;
+      let curD = Infinity;
       for (const s of STOPS) {
         const el = document.getElementById(s.id);
         if (!el) continue;
         const r = el.getBoundingClientRect();
-        pts.push({ center: r.top + r.height / 2, bottom: r.bottom, stop: s });
+        const d = Math.abs(r.top + r.height / 2 - vc);
+        if (s.id === nearRef.current.id) curD = d;
+        if (!best || d < best.d) best = { stop: s, d };
       }
-      if (pts.length === 0) return;
+      if (!best) return;
 
-      let near = pts[pts.length - 1].stop;
-      let x = stopX(near);
-      let y = (near.y - 0.5) * h;
+      let near = nearRef.current;
       // the footer can never reach the viewport center, so treat "scrolled
       // to the bottom" as arriving at the last stop
       const atBottom =
         h + window.scrollY >= document.documentElement.scrollHeight - 2;
-      if (atBottom || vc <= pts[0].center) {
-        near = atBottom ? pts[pts.length - 1].stop : pts[0].stop;
-        x = stopX(near);
-        y = (near.y - 0.5) * h;
-      } else {
-        for (let i = 0; i < pts.length - 1; i++) {
-          const a = pts[i];
-          const b = pts[i + 1];
-          if (vc >= a.center && vc <= b.center) {
-            const t = (vc - a.center) / Math.max(b.center - a.center, 1);
-            near = t < 0.5 ? a.stop : b.stop;
+      if (atBottom) near = STOPS[STOPS.length - 1];
+      else if (curD === Infinity || best.d < curD - h * 0.12) near = best.stop;
 
-            const ax = stopX(a.stop);
-            const bx = stopX(b.stop);
-            const ay = (a.stop.y - 0.5) * h;
-            const by = (b.stop.y - 0.5) * h;
-
-            // where the gap between these two sections currently sits, as a
-            // fraction of the way from stop A to stop B
-            const tb = Math.min(
-              0.85,
-              Math.max(0.15, (a.bottom - a.center) / (b.center - a.center)),
-            );
-            // horizontal cross: pinned to A's side, then a quick step to B's
-            // side right as that gap passes the middle of the screen
-            const W = 0.16;
-            const hp = smooth(
-              Math.min(1, Math.max(0, (t - (tb - W)) / (2 * W))),
-            );
-            x = ax + (bx - ax) * hp;
-
-            // sit at his gutter height, but during the step pull toward the
-            // section gap (whitespace) so he crosses through empty space
-            const gapY = a.bottom - vc; // gap offset from screen center
-            const yStop = ay + (by - ay) * t;
-            const pull = Math.sin(hp * Math.PI);
-            y = yStop + (gapY - yStop) * pull - pull * 8; // tiny hop on top
-            break;
-          }
-        }
-      }
-      target.current = { x, y };
+      target.current = { x: stopX(near), y: (near.y - 0.5) * h };
       nearRef.current = near;
-      setBubbleRight(near.side === "left");
+      setLeftGutter(near.side === "left");
     };
 
     let raf = 0;
@@ -259,25 +226,26 @@ export default function ScrollPal() {
   return (
     <div
       ref={wrapRef}
-      className="pointer-events-none fixed left-0 top-1/2 z-40 hidden xl:block"
+      className="pointer-events-none fixed left-0 top-1/2 z-40 hidden min-[1600px]:block"
       style={{ transform: "translate(40px, -50%)" }}
       aria-hidden
     >
       <div className="relative">
-        {/* sits up by his head; types on arrival (key remount), then holds
-            the line until he walks off to the next stop */}
+        {/* above his head, growing toward the screen edge — it stays in the
+            gutter, so it can never cover text. types on arrival (key
+            remount), then holds the line until he walks off */}
         <div
-          className="absolute -translate-y-1/2"
-          style={{
-            top: "calc(50% - 72px)",
-            ...(bubbleRight ? { left: palW + 14 } : { right: palW + 14 }),
-          }}
+          className="absolute bottom-full mb-3"
+          style={leftGutter ? { right: 0 } : { left: 0 }}
         >
           <div
             key={arrivalId}
-            className={`${bubbleOn ? "pal-say" : "pal-bubble-hide"} w-max max-w-[260px] rounded-2xl border border-line bg-surface px-4 py-2.5 text-sm leading-relaxed text-cream shadow-lg ${
-              bubbleRight ? "origin-bottom-left rounded-bl-md" : "origin-bottom-right rounded-br-md"
+            className={`${bubbleOn ? "pal-say" : "pal-bubble-hide"} rounded-2xl border border-line bg-surface px-4 py-2.5 text-sm leading-relaxed text-cream shadow-lg ${
+              leftGutter
+                ? "origin-bottom-right rounded-br-md"
+                : "origin-bottom-left rounded-bl-md"
             }`}
+            style={{ width: "max-content", maxWidth: bubbleW }}
           >
             {typing ? (
               <span className="flex items-center gap-1 py-1.5">

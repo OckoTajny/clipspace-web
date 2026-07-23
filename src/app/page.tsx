@@ -193,10 +193,10 @@ export default function Home() {
 
       {/* why */}
       <section id="why" className="border-y border-line bg-surface">
-        <div className="mx-auto grid max-w-6xl items-center gap-10 px-6 py-20 md:grid-cols-[auto_1fr] xl:grid-cols-1">
-          {/* the clip pal keeps you company here on phone & tablet; on
-              desktop the walking guide passes through instead */}
-          <div className="mx-auto md:mx-0 xl:hidden" data-reveal>
+        <div className="mx-auto grid max-w-6xl items-center gap-10 px-6 py-20 md:grid-cols-[auto_1fr] min-[1600px]:grid-cols-1">
+          {/* the clip pal keeps you company here up to 1600px; on wide
+              desktops the walking guide passes through instead */}
+          <div className="mx-auto md:mx-0 min-[1600px]:hidden" data-reveal>
             <div className="animate-float">
               <div className="pal-idle">
                 <PalSvg width={90} />
