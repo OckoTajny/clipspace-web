@@ -47,7 +47,6 @@ export function LogoIcon({
       {/* typing dots */}
       <circle cx="30" cy="31.5" r="2.9" fill={dots} />
       <circle cx="38.5" cy="31.5" r="2.9" fill={dots} />
-      <circle cx="47" cy="31.5" r="2.9" fill={dots} opacity="0.45" />
     </svg>
   );
 }
