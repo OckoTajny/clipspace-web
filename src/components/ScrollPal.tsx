@@ -245,10 +245,16 @@ export default function ScrollPal() {
                 ? "origin-bottom-right rounded-br-md"
                 : "origin-bottom-left rounded-bl-md"
             }`}
-            style={{ width: "max-content", maxWidth: bubbleW }}
+            style={{
+              width: "max-content",
+              maxWidth: bubbleW,
+              // never narrower than the pal — keeps the tail well inside
+              // the bubble even when it only holds the typing dots
+              minWidth: palW + 8,
+            }}
           >
             {typing ? (
-              <span className="flex items-center gap-1 py-1.5">
+              <span className="flex items-center justify-center gap-1 py-1.5">
                 <span className="dot-blink inline-block h-1.5 w-1.5 rounded-full bg-muted" />
                 <span className="dot-blink-2 inline-block h-1.5 w-1.5 rounded-full bg-muted" />
                 <span className="dot-blink-3 inline-block h-1.5 w-1.5 rounded-full bg-muted" />
